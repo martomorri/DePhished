@@ -1,0 +1,35 @@
+{
+    "manifest_version": 3,
+    "name": "DePhished",
+    "description": "",
+    "version": "1.0",
+    "icons": {
+        "128": "assets/logo.png"
+    },
+    "permissions": [
+        "storage",
+        "activeTab",
+        "scripting",
+        "tabs"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "https://mail.google.com/*"
+            ],
+            "js": [
+                "contentScript.js"
+            ],
+            "run_at": "document_end"
+        }
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "host_permissions": [
+        "http://mail.google.com/*"
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    }
+}
