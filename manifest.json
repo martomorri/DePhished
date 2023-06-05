@@ -10,25 +10,24 @@
         "storage",
         "activeTab",
         "scripting",
-        "tabs"
+        "tabs",
+        "identity"
     ],
-    "content_scripts": [
-        {
-            "matches": [
-                "https://mail.google.com/*"
-            ],
-            "js": [
-                "contentScript.js"
-            ],
-            "run_at": "document_end"
-        }
-    ],
+    "oauth2": {
+        "client_id": "947052239706-g002c42fbsvadt1i7h5urm9lq745nivt.apps.googleusercontent.com",
+        "scopes": [
+            "https://www.googleapis.com/auth/gmail.readonly",
+            "https://mail.google.com/",
+            "https://www.googleapis.com/auth/userinfo.profile"
+        ]
+    },
     "background": {
         "service_worker": "background.js"
     },
     "host_permissions": [
         "http://mail.google.com/*",
-        "https://mail.google.com/*"
+        "https://mail.google.com/*",
+        "https://oauth-provider-domain.com/*"
     ],
     "action": {
         "default_popup": "popup.html"
