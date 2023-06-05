@@ -23,7 +23,7 @@ window.onload = function () {
                             init)
                             .then((response) => response.json())
                             .then(function (data) {
-                                console.log(data)
+                                console.log(decodeURIComponent(atob(data.payload.parts[0].body.data)))
                             });
                     });
                 });
