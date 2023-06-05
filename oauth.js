@@ -12,11 +12,20 @@ window.onload = function () {
                 'contentType': 'json'
             };
             fetch(
-                'https://gmail.googleapis.com/gmail/v1/users/me/messages/1888bcd62dab1036',
+                'https://gmail.googleapis.com/gmail/v1/users/me/messages/',
                 init)
                 .then((response) => response.json())
                 .then(function (data) {
-                    console.log(data)
+                    console.log(data.messages)
+                    data.messages.forEach(element => {
+                        fetch(
+                            `https://gmail.googleapis.com/gmail/v1/users/me/messages/${element.id}`,
+                            init)
+                            .then((response) => response.json())
+                            .then(function (data) {
+                                console.log(data)
+                            });
+                    });
                 });
             fetch(
                 'https://www.googleapis.com/oauth2/v3/userinfo',
