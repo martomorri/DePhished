@@ -51,12 +51,16 @@ function b64DecodeUnicode(str) {
     // Going backwards: from bytestream, to percent-encoding, to original string.
     // ESTO ES HORRIBLE ARREGLAR CON GURU DE JS
     let decoded = "";
-    try{
-        decoded = decodeURIComponent(atob(str).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''))
-    }catch(DOMException){
-    }
+    // try {
+        // let converted = str.replace('-', '+');
+        // converted = converted.replace('_', '/');
+        decoded = atob(str.replace(/-/g, '+').replace(/_/g, '/'));
+        // decoded = decodeURIComponent(atob(converted).split('').map(function(c) {
+        //     return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        // }).join(''))
+    // } 
+    // catch(DOMException){
+    // }
 
     
     return decoded;
