@@ -20,15 +20,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                         init)
                         .then((response) => response.json())
                         .then(function (data) {
-                            let mailBody;
-                            let mailHtml;
+                            let mailBody = "";
+                            let mailHtml = "";
                             console.log(data);
-                            if (data.payload.body.size === 0) { mailBody = data.payload.parts[0].body.data; mailHtml = data.payload.parts[1].body.data; }
+                            if (data.payload.body.size === 0) {
+                                mailBody = data.payload.parts[0].body.data;
+                                if (data.payload.parts.length > 1) mailHtml = data.payload.parts[1].body.data;
+                                if (mailBody === undefined) {
+                                    console.log(data.payload.parts[0].parts[0].body.data);
+                                    mailBody = data.payload.parts[0].parts[0].body.data;
+                                }
+                            }
                             else {
-                                mailBody = data.payload.body;
+                                mailBody = data.payload.body.data;
                             }
                             // console.log("Text/Plain: " + b64DecodeUnicode(mailBody));
                             // console.log("Html: " + b64DecodeUnicode(mailHtml));
+                            console.log(mailBody);
                             const emailContent = {
                                 body: b64DecodeUnicode(mailBody),
                                 html: b64DecodeUnicode(mailHtml)
@@ -42,6 +50,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 function b64DecodeUnicode(str) {
+    console.log(str);
     return atob(str.replace(/-/g, '+').replace(/_/g, '/'));
 }
 
