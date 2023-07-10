@@ -57,7 +57,7 @@ function b64DecodeUnicode(str) {
 }
 
 function extractUrlsFromEmail(content) {
-    const urlRegex = /https?:\/\/[^\s/$.?#].[^'">)\s]*/g;
+    const urlRegex = /https?:\/\/[^\s/$.?#].[^'">)?\s]*/g;
     const urls = content.body.match(urlRegex) || content.html.match(urlRegex) || [];
     console.log(urls);
     return urls;
@@ -69,10 +69,8 @@ function virusTotalRequest(urlEncoded) {
     }
     console.log(urlEncoded);
     const options = {
-        mode: 'no-cors',
         method: 'GET',
         headers: {
-            accept: 'application/json',
             'x-apikey': '3721d83eb3fe9b8df7c29d9f93ec0052da352e49074b7cd9d2283fb944af400f'
         }
     };
