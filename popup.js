@@ -13,3 +13,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         authenticateButton.remove();
     }
 });
+
+// chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+//     if (message.action === 'generatePopup') {
+//         console.log("hello");
+//         chrome.scripting.executeScript({
+//             target: { tabId: message.tabId }, // Specify the active tab where you want to inject the dynamic content
+//             function: displayDynamicContent
+//         });
+//     }
+// });
+
+// function displayDynamicContent() {
+//     const p = document.createElement('p');
+//     p.innerHTML = "Hola soy una alerta";
+//     document.body.appendChild(p);
+// }
