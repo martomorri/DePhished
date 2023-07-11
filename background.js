@@ -67,7 +67,7 @@ function virusTotalRequest(urlEncoded) {
     if (urlEncoded.includes("=")) {
         urlEncoded = urlEncoded.replace(/=/g, '');
     }
-    console.log(urlEncoded);
+    // console.log(urlEncoded);
     const options = {
         method: 'GET',
         headers: {
@@ -77,7 +77,7 @@ function virusTotalRequest(urlEncoded) {
 
     const url = 'https://www.virustotal.com/api/v3/urls/' + urlEncoded;
 
-    console.log(url);
+    // console.log(url);
 
     fetch(url, options)
         .then(response => response.json())
