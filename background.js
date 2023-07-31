@@ -1,8 +1,10 @@
+let init = {}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'authenticate') {
         chrome.identity.getAuthToken({ interactive: true }, function (token) {
             console.log(token);
-            let init = {
+            init = {
                 method: 'GET',
                 async: true,
                 headers: {
@@ -11,48 +13,47 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 },
                 'contentType': 'json'
             };
-            chrome.runtime.sendMessage({ action: 'authenticationComplete', data: token });
-            chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-                if (message.action === 'email-click') {
-                    // chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                    //     console.log(tabs[0].id);
-                    //     const tabId = tabs[0].id;
-                    //     chrome.runtime.sendMessage({ action:'generatePopup', tabId: tabId });
-                    // });
-                    console.log(message.emailId);
-                    fetch(
-                        `https://gmail.googleapis.com/gmail/v1/users/me/messages/${message.emailId}`,
-                        init)
-                        .then((response) => response.json())
-                        .then(function (data) {
-                            let mailBody = "";
-                            let mailHtml = "";
-                            if (data.payload.body.size === 0) {
-                                mailBody = data.payload.parts[0].body.data;
-                                if (data.payload.parts.length > 1) mailHtml = data.payload.parts[1].body.data;
-                                if (mailBody === undefined) {
-                                    mailBody = data.payload.parts[0].parts[0].body.data;
-                                }
-                            }
-                            else {
-                                mailBody = data.payload.body.data;
-                            }
-                            const emailContent = {
-                                body: b64DecodeUnicode(mailBody),
-                                html: b64DecodeUnicode(mailHtml)
-                            }
-                            let urls = extractUrlsFromEmail(emailContent);
-                            urls.forEach(url => {
-                                virusTotalRequest(btoa(url));
-                            });
-                        });
-                }
-            });
+            chrome.action.setPopup({ popup: "./popup.html" })
         });
+    }
+    if (message.action === 'email-click') {
+        console.log(message.emailId);
+        let urls = "";
+        fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${message.emailId}`, init)
+            .then((response) => response.json())
+            .then(function (data) {
+                let mailBody = "";
+                let mailHtml = "";
+                if (data.payload.body.size === 0) {
+                    mailBody = data.payload.parts[0].body.data;
+                    if (data.payload.parts.length > 1) mailHtml = data.payload.parts[1].body.data;
+                    if (mailBody === undefined) {
+                        mailBody = data.payload.parts[0].parts[0].body.data;
+                    }
+                } else {
+                    mailBody = data.payload.body.data;
+                }
+                const emailContent = {
+                    body: b64DecodeUnicode(mailBody),
+                    html: b64DecodeUnicode(mailHtml)
+                };
+                urls = extractUrlsFromEmail(emailContent);
+                urls.forEach(url => {
+                    virusTotalRequest(btoa(url));
+                });
+
+                chrome.action.setPopup({ popup: "./alert.html" })
+            });
+    }
+    if (message.action === 'reset-popup') {
+        console.log(chrome.action)
+        chrome.action.setPopup({ popup: "./popup.html" })
     }
 });
 
 function b64DecodeUnicode(str) {
+    console.log(str);
+    if (str === undefined) return "";
     return atob(str.replace(/-/g, '+').replace(/_/g, '/'));
 }
 
