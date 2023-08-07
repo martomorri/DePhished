@@ -84,13 +84,9 @@ async function virusTotalRequest(urlEncoded) {
         .then(response => response.json())
         .then(function (data) {
             console.log(data.data.attributes.last_analysis_stats)
+            return data.data.attributes.last_analysis_stats
         })
         .catch(err => console.error(err))
-        .finally(() => {
-            analysis_result = data.data.attributes.last_analysis_stats
-        })
-    
-    return analysis_result
 }
 
 function analyseVTResponse(vtResponses) {
