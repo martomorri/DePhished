@@ -13,7 +13,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 },
                 'contentType': 'json'
             };
-            chrome.action.setPopup({ popup: "./popup.html" })
+            // chrome.action.setPopup({ popup: "./popup.html" })
         });
     }
     if (message.action === 'email-click') {
@@ -42,17 +42,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     virusTotalRequest(btoa(url));
                 });
 
-                chrome.action.setPopup({ popup: "./alert.html" })
+                // chrome.action.setPopup({ popup: "./alert.html" })
             });
     }
-    if (message.action === 'reset-popup') {
-        console.log(chrome.action)
-        chrome.action.setPopup({ popup: "./popup.html" })
-    }
+    // if (message.action === 'reset-popup') {
+    //     // console.log(chrome.action)
+    //     chrome.action.setPopup({ popup: "./popup.html" })
+    // }
 });
 
 function b64DecodeUnicode(str) {
-    console.log(str);
+    // console.log(str);
     if (str === undefined) return "";
     return atob(str.replace(/-/g, '+').replace(/_/g, '/'));
 }
@@ -68,7 +68,7 @@ function virusTotalRequest(urlEncoded) {
     if (urlEncoded.includes("=")) {
         urlEncoded = urlEncoded.replace(/=/g, '');
     }
-    console.log(urlEncoded);
+    // console.log(urlEncoded);
     const options = {
         method: 'GET',
         headers: {

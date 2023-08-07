@@ -11,8 +11,7 @@
         "activeTab",
         "scripting",
         "tabs",
-        "identity",
-        "action"
+        "identity"
     ],
     "oauth2": {
         "client_id": "947052239706-g002c42fbsvadt1i7h5urm9lq745nivt.apps.googleusercontent.com",

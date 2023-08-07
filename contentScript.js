@@ -8,10 +8,10 @@ window.onload = function () {
         if (!email_id) {
             email_id = email_element.childNodes[0].getAttribute("data-legacy-last-message-id");
         }
-        console.log(email_id);
         element.addEventListener("click", function (event) {
             chrome.runtime.sendMessage({ action: "email-click", emailId: email_id });
-            chrome.runtime.sendMessage({ action: "open-popup" });
+            // chrome.runtime.sendMessage({ action: "open-popup" });
         });
     });
+    console.log("Finished charging");
 };
