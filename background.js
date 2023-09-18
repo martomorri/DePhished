@@ -40,7 +40,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 urls = extractUrlsFromEmail(emailContent)
                 vtResponses = []
                 urls.forEach(url => {
-                    vtResponses.push(virusTotalRequest(btoa(url)))
+                    vtResponses.push(virusTotalRequest(url))
                 });
                 const alert = analyseVTResponse(vtResponses) ? './malicious.html' : './harmless.html'
                 chrome.action.setPopup({ popup: alert })
@@ -63,30 +63,62 @@ function extractUrlsFromEmail(content) {
     return urls
 }
 
-async function virusTotalRequest(urlEncoded) {
+async function virusTotalRequest(urlToAnalyse) {
+    let urlEncoded = btoa(urlToAnalyse)
     if (urlEncoded.includes('=')) {
         urlEncoded = urlEncoded.replace(/=/g, '')
     }
-    const options = {
+    const optionsGet = {
         method: 'GET',
         headers: {
             'x-apikey': '3721d83eb3fe9b8df7c29d9f93ec0052da352e49074b7cd9d2283fb944af400f'
         }
     }
 
-    const url = 'https://www.virustotal.com/api/v3/urls/' + urlEncoded
+    let url = 'https://www.virustotal.com/api/v3/urls/' + urlEncoded
 
-    console.log(url)
+    let analysis_results
 
-    let analysis_result
-
-    fetch(url, options)
+    fetch(url, optionsGet)
         .then(response => response.json())
         .then(function (data) {
-            console.log(data.data.attributes.last_analysis_stats)
-            return data.data.attributes.last_analysis_stats
+            if (data.error) {
+                const optionsPost = {
+                    method: 'POST',
+                    headers: {
+                        accept: 'application/json',
+                        'x-apikey': '3721d83eb3fe9b8df7c29d9f93ec0052da352e49074b7cd9d2283fb944af400f',
+                        'content-type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({ url: urlToAnalyse })
+                };
+
+                fetch('https://www.virustotal.com/api/v3/urls', optionsPost)
+                    .then(response => response.json())
+                    .then(response => {
+                        console.log(response)
+                        const start = response.data.id.indexOf('-')
+                        const end = response.data.id.lastIndexOf('-')
+                        const id = response.data.id.slice(start, end)
+                        url = 'https://www.virustotal.com/api/v3/urls/' + id
+                        fetch(url, optionsGet)
+                            .then(response => response.json())
+                            .then(function (data) {
+                                console.log(data.data.attributes.last_analysis_stats)
+                                analysis_results = data.data.attributes.last_analysis_stats
+                            })
+                    })
+                    .catch(err => console.error(err));
+            }
+            else {
+                console.log(data.data.attributes.last_analysis_stats)
+                analysis_results = data.data.attributes.last_analysis_stats
+            }
         })
         .catch(err => console.error(err))
+        .finally(() => {
+            return analysis_results
+        })
 }
 
 function analyseVTResponse(vtResponses) {
