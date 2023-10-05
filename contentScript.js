@@ -1,4 +1,7 @@
-window.onload = function () {
+window.onload = loadElements()
+document.body.addEventListener('click', loadElements, true)
+
+function loadElements() {
     const emailElementOnLoad = document.querySelectorAll(
         'tr[jscontroller="ZdOxDb"]'
     );
@@ -8,10 +11,13 @@ window.onload = function () {
         if (!email_id) {
             email_id = email_element.childNodes[0].getAttribute('data-legacy-last-message-id')
         }
-        element.addEventListener('click', function (event) {
-            chrome.runtime.sendMessage({ action: 'email-click', emailId: email_id })
-            // chrome.runtime.sendMessage({ action: 'open-popup' })
-        })
+        element.removeEventListener('click', () => listener(email_id));
+        element.addEventListener('click', () => listener(email_id));
     })
     console.log("Finished charging")
+}
+
+function listener (email_id) {
+    chrome.runtime.sendMessage({ action: 'email-click', emailId: email_id })
+    // chrome.runtime.sendMessage({ action: 'open-popup' })
 }

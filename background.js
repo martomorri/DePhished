@@ -83,32 +83,45 @@ async function virusTotalRequest(urlToAnalyse) {
         .then(response => response.json())
         .then(function (data) {
             if (data.error) {
-                const optionsPost = {
-                    method: 'POST',
-                    headers: {
-                        accept: 'application/json',
-                        'x-apikey': '3721d83eb3fe9b8df7c29d9f93ec0052da352e49074b7cd9d2283fb944af400f',
-                        'content-type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({ url: urlToAnalyse })
-                };
+                if (data.error.code === 'QuotaExceededError') {
+                    return { error: 'vt not working' }
+                    // fetch('./assets/malicious-url-list.txt')
+                    //     .then(res = res.text())
+                    //     .then(content => {
+                    //         let lines = content.split(/\n/)
+                    //         lines.forEach(line => {
+                    //             if (line.includes(urlToAnalyse)) analysis_results = { malicious: 1, suspicious: 0 }
+                    //         })
+                    //     })
+                }
+                else {
+                    const optionsPost = {
+                        method: 'POST',
+                        headers: {
+                            accept: 'application/json',
+                            'x-apikey': '3721d83eb3fe9b8df7c29d9f93ec0052da352e49074b7cd9d2283fb944af400f',
+                            'content-type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({ url: urlToAnalyse })
+                    };
 
-                fetch('https://www.virustotal.com/api/v3/urls', optionsPost)
-                    .then(response => response.json())
-                    .then(response => {
-                        console.log(response)
-                        const start = response.data.id.indexOf('-')
-                        const end = response.data.id.lastIndexOf('-')
-                        const id = response.data.id.slice(start, end)
-                        url = 'https://www.virustotal.com/api/v3/urls/' + id
-                        fetch(url, optionsGet)
-                            .then(response => response.json())
-                            .then(function (data) {
-                                console.log(data.data.attributes.last_analysis_stats)
-                                analysis_results = data.data.attributes.last_analysis_stats
-                            })
-                    })
-                    .catch(err => console.error(err));
+                    fetch('https://www.virustotal.com/api/v3/urls', optionsPost)
+                        .then(response => response.json())
+                        .then(response => {
+                            console.log(response)
+                            const start = response.data.id.indexOf('-')
+                            const end = response.data.id.lastIndexOf('-')
+                            const id = response.data.id.slice(start+1, end)
+                            url = 'https://www.virustotal.com/api/v3/urls/' + id
+                            fetch(url, optionsGet)
+                                .then(response => response.json())
+                                .then(function (data) {
+                                    console.log(data)
+                                    analysis_results = data.data.attributes.last_analysis_stats
+                                })
+                        })
+                        .catch(err => console.error(err));
+                }
             }
             else {
                 console.log(data.data.attributes.last_analysis_stats)
@@ -123,7 +136,8 @@ async function virusTotalRequest(urlToAnalyse) {
 
 function analyseVTResponse(vtResponses) {
     vtResponses.map(r => {
-        if (r.malicious > 0 || r.suspicious > 0) return false
+        if (r.error) return false
+        else if (r.malicious > 0 || r.suspicious > 0) return false
     })
     return true
 }
