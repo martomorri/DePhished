@@ -1,23 +1,25 @@
-window.onload = loadElements()
-document.body.addEventListener('click', loadElements, true)
+window.onload = loadElements;
+document.body.addEventListener('click', loadElements, true);
 
 function loadElements() {
-    const emailElementOnLoad = document.querySelectorAll(
-        'tr[jscontroller="ZdOxDb"]'
-    );
-    emailElementOnLoad.forEach((element) => {
-        let email_element = element.childNodes[4].childNodes[0].childNodes[0].childNodes[0].childNodes[0].childNodes[0]
-        let email_id = email_element.getAttribute('data-legacy-last-message-id')
-        if (!email_id) {
-            email_id = email_element.childNodes[0].getAttribute('data-legacy-last-message-id')
-        }
-        element.removeEventListener('click', () => listener(email_id));
-        element.addEventListener('click', () => listener(email_id));
-    })
-    console.log("Finished charging")
+    // Elimina todos los oyentes en la lista de correos electrónicos
+    const emailList = document.querySelectorAll('tr[jscontroller="ZdOxDb"]');
+    emailList.forEach((element) => {
+        element.removeEventListener('click', clickListener);
+    });
+
+    // Agrega nuevos oyentes a la lista de correos electrónicos
+    emailList.forEach((element) => {
+        element.addEventListener('click', clickListener);
+    });
+
+    console.log("Finished charging");
 }
 
-function listener (email_id) {
-    chrome.runtime.sendMessage({ action: 'email-click', emailId: email_id })
-    // chrome.runtime.sendMessage({ action: 'open-popup' })
+function clickListener(event) {
+    // Lógica para el evento de clic
+    const emailElement = event.currentTarget;
+    const email_id = emailElement.querySelector('[data-legacy-last-message-id]').getAttribute('data-legacy-last-message-id');
+    chrome.runtime.sendMessage({ action: 'email-click', emailId: email_id });
+    // Otra lógica específica para el evento de clic
 }
