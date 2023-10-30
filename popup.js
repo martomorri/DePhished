@@ -1,6 +1,7 @@
 function authenticate() {
     chrome.runtime.sendMessage({ action: 'authenticate' })
     close()
+    // openPopup('./popup.html')
 }
 
 function deleteEmail() {
@@ -20,16 +21,19 @@ const deleteButton = document.getElementById('deleteButton')
 if (deleteButton) deleteButton.addEventListener('click', deleteEmail)
 
 function openPopup(popup) {
+    // open(popup, '_self', 'popup')
     chrome.windows.create({
         url: popup,
         type: 'popup',
-        width: 400,
-        height: 300,
+        width: 340,
+        height: 355,
+        left: 1450,
+        top: 50
     })
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === 'open-popup') {
-        openPopup(message.popup)
+    if (message.action === 'reload') {
+        location.reload()
     }
 })

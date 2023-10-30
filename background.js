@@ -4,7 +4,7 @@ chrome.runtime.onInstalled.addListener(() => {
         if (message.action === 'authenticate') {
             chrome.identity.getAuthToken({ interactive: true }, function (token) {
                 console.log(token)
-                token = token
+                auth_token = token
                 init = {
                     method: 'GET',
                     async: true,
@@ -46,7 +46,6 @@ chrome.runtime.onInstalled.addListener(() => {
                 const vtResponses = await Promise.all(urls.map(url => virusTotalRequest(url)))
                 alert = await analyseVTResponse(vtResponses)
                 chrome.action.setPopup({ popup: alert })
-                chrome.runtime.sendMessage({ action: 'open-popup', popup: alert })
             } catch (error) {
                 console.error(error)
             }
@@ -62,9 +61,10 @@ chrome.runtime.onInstalled.addListener(() => {
                 'contentType': 'json'
             }
             fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${email_id}`, optionsDelete)
-                .then(
+                .then(() => {
                     chrome.action.setPopup({ popup: './popup.html' })
-                )
+                    chrome.runtime.sendMessage({ action: 'reload' })
+                })
         }
     })
 })
