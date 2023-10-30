@@ -1,9 +1,10 @@
 chrome.runtime.onInstalled.addListener(() => {
-    let init = {};
+    let init = {}, auth_token = '', email_id = ''
     chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         if (message.action === 'authenticate') {
             chrome.identity.getAuthToken({ interactive: true }, function (token) {
-                console.log(token);
+                console.log(token)
+                token = token
                 init = {
                     method: 'GET',
                     async: true,
@@ -12,65 +13,78 @@ chrome.runtime.onInstalled.addListener(() => {
                         'Content-Type': 'application/json'
                     },
                     'contentType': 'json'
-                };
-                chrome.action.setPopup({ popup: './popup.html' });
+                }
+                chrome.action.setPopup({ popup: './popup.html' })
             });
         }
         if (message.action === 'email-click') {
-            console.log(message.emailId);
-            let urls = '', alert = '';
+            console.log(message.emailId)
+            email_id = message.emailId
+            let urls = '', alert = ''
             try {
-                const response = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${message.emailId}`, init);
-                const data = await response.json();
-                let mailBody = '';
-                let mailHtml = '';
-    
+                const response = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${message.emailId}`, init)
+                const data = await response.json()
+                let mailBody = ''
+                let mailHtml = ''
+
                 if (data.payload.body.size === 0) {
-                    mailBody = data.payload.parts[0].body.data;
-                    if (data.payload.parts.length > 1) mailHtml = data.payload.parts[1].body.data;
+                    mailBody = data.payload.parts[0].body.data
+                    if (data.payload.parts.length > 1) mailHtml = data.payload.parts[1].body.data
                     if (mailBody === undefined) {
-                        mailBody = data.payload.parts[0].parts[0].body.data;
+                        mailBody = data.payload.parts[0].parts[0].body.data
                     }
                 } else {
-                    mailBody = data.payload.body.data;
+                    mailBody = data.payload.body.data
                 }
-    
+
                 const emailContent = {
                     body: b64DecodeUnicode(mailBody),
                     html: b64DecodeUnicode(mailHtml),
-                };
-    
-                urls = extractUrlsFromEmail(emailContent);
-                const vtResponses = await Promise.all(urls.map(url => virusTotalRequest(url)));
-                alert = await analyseVTResponse(vtResponses);
-                chrome.action.setPopup({ popup: alert });
-                chrome.runtime.sendMessage({ action: 'open-popup', popup: alert });
+                }
+
+                urls = extractUrlsFromEmail(emailContent)
+                const vtResponses = await Promise.all(urls.map(url => virusTotalRequest(url)))
+                alert = await analyseVTResponse(vtResponses)
+                chrome.action.setPopup({ popup: alert })
+                chrome.runtime.sendMessage({ action: 'open-popup', popup: alert })
             } catch (error) {
-                console.error(error);
+                console.error(error)
             }
         }
-        if (message.action === 'reset-popup') {
-            chrome.action.setPopup({ popup: './popup.html' });
+        if (message.action === 'delete-email') {
+            const optionsDelete = {
+                method: 'DELETE',
+                async: true,
+                headers: {
+                    Authorization: 'Bearer ' + auth_token,
+                    'Content-Type': 'application/json'
+                },
+                'contentType': 'json'
+            }
+            fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${email_id}`, optionsDelete)
+                .then(
+                    chrome.action.setPopup({ popup: './popup.html' })
+                )
         }
-    });
+    })
 })
 
 function b64DecodeUnicode(str) {
-    if (str === undefined) return '';
-    return atob(str.replace(/-/g, '+').replace(/_/g, '/'));
+    if (str === undefined) return ''
+    return atob(str.replace(/-/g, '+').replace(/_/g, '/'))
 }
 
 function extractUrlsFromEmail(content) {
-    const urlRegex = /https?:\/\/[^\s/$.?#][^\s'">)]*/g;
-    const urls = content.body.match(urlRegex) || content.html.match(urlRegex) || [];
-    console.log(urls);
+    const urlRegex = /https?:\/\/[^\s/$.?#][^\s'">)]*/g
+    const urls = content.body.match(urlRegex) || content.html.match(urlRegex) || []
+    console.log(urls)
     return urls;
 }
 
 async function virusTotalRequest(urlToAnalyse) {
-    let urlEncoded = btoa(urlToAnalyse);
+    let urlEncoded = btoa(urlToAnalyse)
     if (urlEncoded.includes('=')) {
-        urlEncoded = urlEncoded.replace(/=/g, '');
+        urlEncoded = urlEncoded.replace(/=/g, '')
     }
     const optionsGet = {
         method: 'GET',
@@ -79,16 +93,16 @@ async function virusTotalRequest(urlToAnalyse) {
             'x-apikey': '3721d83eb3fe9b8df7c29d9f93ec0052da352e49074b7cd9d2283fb944af400f',
         }
     }
-    
-    let url = 'https://www.virustotal.com/api/v3/urls/' + urlEncoded;
-    
+
+    let url = 'https://www.virustotal.com/api/v3/urls/' + urlEncoded
+
     try {
-        const response = await fetch(url, optionsGet);
-        const data = await response.json();
-    
+        const response = await fetch(url, optionsGet)
+        const data = await response.json()
+
         if (data.error) {
             if (data.error.code === 'QuotaExceededError') {
-                return await analyseWithTxt(urlToAnalyse);
+                return await analyseWithTxt(urlToAnalyse)
             } else {
                 const optionsPost = {
                     method: 'POST',
@@ -98,10 +112,10 @@ async function virusTotalRequest(urlToAnalyse) {
                         'content-type': 'application/x-www-form-urlencoded',
                     }
                 }
-    
+
                 const postResponse = await fetch('https://www.virustotal.com/api/v3/urls', optionsPost)
                 const postResult = await postResponse.json()
-    
+
                 if (postResult.error) {
                     return await analyseWithTxt(urlToAnalyse)
                 } else {
@@ -111,7 +125,7 @@ async function virusTotalRequest(urlToAnalyse) {
                     url = 'https://www.virustotal.com/api/v3/urls/' + id
                     const urlResponse = await fetch(url, optionsGet)
                     const urlData = await urlResponse.json()
-    
+
                     if (urlData.error) {
                         return await analyseWithTxt(urlToAnalyse)
                     } else {
@@ -131,19 +145,19 @@ async function virusTotalRequest(urlToAnalyse) {
 async function analyseWithTxt(urlToAnalyse) {
     const urlObjectToAnalyse = new URL(urlToAnalyse)
     let analysis_results = { malicious: 0, suspicious: 0 }
-    
+
     try {
         const res = await fetch('./assets/urlhaus.abuse.ch.txt')
         const text = await res.text()
         const lines = text.split(/\n/)
-    
+
         for (const line of lines) {
             if (line.includes(urlObjectToAnalyse.hostname)) {
                 analysis_results = { malicious: 1, suspicious: 0 }
                 break
             }
         }
-    
+
         return analysis_results
     } catch (error) {
         console.error(error)
@@ -155,7 +169,7 @@ async function analyseVTResponse(vtResponses) {
     console.log(vtResponses)
     const malicious = vtResponses.some(response => response.malicious > 0)
     const suspicious = vtResponses.some(response => response.suspicious > 5)
-    
+
     if (malicious) {
         return './malicious.html'
     } else if (suspicious) {

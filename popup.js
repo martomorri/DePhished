@@ -3,22 +3,33 @@ function authenticate() {
     close()
 }
 
+function deleteEmail() {
+    chrome.runtime.sendMessage({ action: 'delete-email' })
+    close()
+}
+
 const authenticateButton = document.getElementById('oauth-button')
 if (authenticateButton) authenticateButton.addEventListener('click', authenticate)
 
-const button = document.getElementById('reset-popup')
-if (button) button.addEventListener('click', () => { 
+const acceptButton = document.getElementById('acceptButton')
+if (acceptButton) acceptButton.addEventListener('click', () => { 
     close()
 })
 
+const deleteButton = document.getElementById('deleteButton')
+if (deleteButton) deleteButton.addEventListener('click', deleteEmail)
+
+function openPopup(popup) {
+    chrome.windows.create({
+        url: popup,
+        type: 'popup',
+        width: 400,
+        height: 300,
+    })
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'open-popup') {
-        console.log("hello")
-        chrome.windows.create({
-            url: message.popup,
-            type: 'popup',
-            width: 400,
-            height: 300,
-        })
+        openPopup(message.popup)
     }
 })
