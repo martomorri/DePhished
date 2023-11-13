@@ -53,7 +53,7 @@ La seguridad es lo más importante a la hora de navegar por internet. Nosotros, 
 
 Este es el lenguaje utilizado en este proyecto.
 
-<img src=[JS] width="80" height="auto">
+<img src=https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/JavaScript-logo.png/768px-JavaScript-logo.png width="80" height="auto">
 
 <p align="right"><a href="#readme-top">Volver al inicio</a></p>
 
@@ -104,7 +104,3 @@ Estos son los recursos utilizados en nuestro proyecto:
 
 <p align="right"><a href="#readme-top">Volver al inicio</a></p>
 
-
-
-<!-- MARKDOWN LINKS E IMAGENES -->
-[JS]: https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/JavaScript-logo.png/768px-JavaScript-logo.png
